@@ -1,17 +1,17 @@
 ﻿<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container">
+    <div class="container-fluid">
         <a class="navbar-brand" href="#">Navbar</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                @foreach (var link in navLinks)
-                {
-                    <li class="nav-item">
-                        <a class="nav-link" href="@link.Url">@link.Text</a>
-                    </li>
-                }
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Home</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="counter">Link</NavLink>
+                </li>
             </ul>
             <form class="d-flex" role="search">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
@@ -20,17 +20,3 @@
         </div>
     </div>
 </nav>
-
-@code {
-
-    public List<NavLink> navLinks = new List<NavLink>
-    {
-        new NavLink { Text = "Home", Url = "/" },
-        new NavLink { Text = "Counter", Url = "/counter" }
-    };
-    public class NavLink
-    {
-        public string Text { get; set; }
-        public string Url { get; set; }
-    }
-}

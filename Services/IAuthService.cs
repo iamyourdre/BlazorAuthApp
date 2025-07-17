@@ -6,6 +6,9 @@ namespace BlazorAuthApp.Services
     public interface IAuthService
     {
         Task<User?> RegisterAsync(UserDTO request);
-        Task<string?> LoginAsync(UserDTO request);
+        Task<TokenResponseDTO?> LoginAsync(UserDTO request);
+        Task<TokenResponseDTO?> RefreshTokenAsync(RefreshTokenRequestDTO request);
+
+
     }
 }
