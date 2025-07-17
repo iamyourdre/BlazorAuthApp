@@ -26,15 +26,15 @@ namespace BlazorAuthApp.Controllers
             return Ok(user);
         }
 
-        //[HttpPost("login")]
-        //public async Task<ActionResult<string>> Login(UserDTO request)
-        //{
-        //    var token = await authService.LoginAsync(request);
-        //    if (token == null)
-        //        return BadRequest("Invalid username or password");
+        [HttpPost("login")]
+        public async Task<ActionResult<string>> Login(UserDTO request)
+        {
+            var token = await authService.LoginAsync(request);
+            if (token == null)
+                return Unauthorized("Invalid username or password");
+            return Ok(token);
+        }
 
-        //    return Ok(token);
-        //}
     }
 
 }
