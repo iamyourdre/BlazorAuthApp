@@ -1,0 +1,32 @@
+﻿@using System.Timers
+
+<Toasts class="p-3" Messages="messages" Placement="ToastsPlacement.BottomRight" />
+
+@code {
+    private List<ToastMessage> messages = new();
+
+    public void ShowMessage(ToastType toastType, string message, int duration = 3000)
+    {
+        var toast = new ToastMessage { Type = toastType, Message = message };
+        messages.Add(toast);
+        StateHasChanged();
+
+        var timer = new Timer(duration);
+        timer.Elapsed += (s, e) =>
+        {
+            timer.Dispose();
+            RemoveToast(toast);
+        };
+        timer.AutoReset = false;
+        timer.Start();
+    }
+
+    private void RemoveToast(ToastMessage toast)
+    {
+        InvokeAsync(() =>
+        {
+            messages.Remove(toast);
+            StateHasChanged();
+        });
+    }
+}

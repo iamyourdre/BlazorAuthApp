@@ -1,6 +1,6 @@
 ﻿<nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <NavLink class="navbar-brand" href="#">Navbar</NavLink>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -9,14 +9,11 @@
                 @foreach (var link in navLinks)
                 {
                     <li class="nav-item">
-                        <a class="nav-link" href="@link.Url">@link.Text</a>
+                        <NavLink class="nav-link" href="@link.Url" Match="NavLinkMatch.All">@link.Text</NavLink>
                     </li>
                 }
             </ul>
-            <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+            <NavLink class="btn btn-primary" href="@navLinks[1].Url">@navLinks[1].Text</NavLink>
         </div>
     </div>
 </nav>
@@ -26,7 +23,8 @@
     public List<NavLink> navLinks = new List<NavLink>
     {
         new NavLink { Text = "Home", Url = "/" },
-        new NavLink { Text = "Counter", Url = "/counter" }
+        new NavLink { Text = "Login", Url = "/login" },
+        new NavLink { Text = "Register", Url = "/register" }
     };
     public class NavLink
     {

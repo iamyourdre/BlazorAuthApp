@@ -21,7 +21,10 @@ builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BlazorAuthAppDatabase")));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+builder.Services.AddHttpClient("MyHttpClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7090/"); // Use your actual host and port
+});
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

@@ -1,0 +1,74 @@
+﻿@page "/login"  
+@inject NavigationManager Navigation  
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+
+
+@using BlazorAuthApp.Components.Shared
+@using BlazorAuthApp.Models  
+<Toaster @ref="toaster" />
+
+<PageTitle>Login</PageTitle>  
+
+<div>
+
+    <h3>Login</h3>  
+    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">  
+        <DataAnnotationsValidator />  
+        <ValidationSummary />  
+        <div class="mb-3">  
+            <label for="username" class="form-label">Username</label>  
+            <InputText id="username" class="form-control" @bind-Value="loginModel.Username" />  
+        </div>  
+        <div class="mb-3">  
+            <label for="password" class="form-label">Password</label>  
+            <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />  
+        </div>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        <div class="mb-3">  
+            <button type="submit" class="btn btn-primary">Login</button>  
+        </div>
+    </EditForm>  
+</div>  
+
+@code {
+    private UserDTO loginModel = new();  
+    private string? errorMessage;
+    private Toaster? toaster;
+
+    private async Task HandleLogin()  
+    {  
+        errorMessage = null;
+        try  
+        {
+            if (string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
+            {
+                toaster?.ShowMessage(ToastType.Danger, "Username and password cannot be empty.");
+                return;
+            }
+
+            // Use the named HttpClient
+            var client = HttpClientFactory.CreateClient("MyHttpClient");
+            var response = await client.PostAsJsonAsync("api/auth/login", loginModel);
+
+            if (response.IsSuccessStatusCode)
+            {  
+                // Navigation.NavigateTo("/");
+                toaster?.ShowMessage(ToastType.Success, "TRUE.");
+            }  
+            else  
+            {  
+                errorMessage = await response.Content.ReadAsStringAsync();
+                toaster?.ShowMessage(ToastType.Danger, errorMessage);
+            }  
+        }  
+        catch (Exception ex)  
+        {  
+            errorMessage = "An error occurred: " + ex.Message;
+            toaster?.ShowMessage(ToastType.Danger, errorMessage);
+        }  
+    }
+}
