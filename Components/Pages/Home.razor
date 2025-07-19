@@ -1,8 +1,86 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage SessionStorage
+@inject IJSRuntime JS
 
 <PageTitle>Home</PageTitle>
 
 <div>
-	<h2>Hello, world!</h2>
-	Welcome to your new app.
+    <h2>Hello, world!</h2>
+    @if (isAuthenticated == null)
+    {
+        <p>Checking authentication...</p>
+    }
+    else if (isAuthenticated == true)
+    {
+        <p>Welcome to your new app. You are authenticated.</p>
+    }
+    else
+    {
+        <p>You are not authenticated. Please <a href="/login">login</a>.</p>
+    }
 </div>
+
+@code {
+    private bool? isAuthenticated = null;
+    private bool _checkedAuth = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_checkedAuth)
+        {
+            _checkedAuth = true;
+            var result = await SessionStorage.GetAsync<string>("accessToken");
+            var token = result.Success ? result.Value : null;
+
+            if (!string.IsNullOrWhiteSpace(token) && !IsTokenExpired(token))
+            {
+                isAuthenticated = true;
+            }
+            else
+            {
+                isAuthenticated = false;
+            }
+            StateHasChanged();
+        }
+    }
+
+    // Basic JWT expiration check (without validating signature)
+    private bool IsTokenExpired(string token)
+    {
+        try
+        {
+            var parts = token.Split('.');
+            if (parts.Length != 3)
+                return true;
+
+            var payload = parts[1];
+            var json = System.Text.Encoding.UTF8.GetString(ParseBase64WithoutPadding(payload));
+            var expIndex = json.IndexOf("\"exp\":", StringComparison.OrdinalIgnoreCase);
+            if (expIndex == -1)
+                return true;
+
+            var expString = json.Substring(expIndex + 6).Split(',')[0].Trim(' ', '}');
+            if (long.TryParse(expString, out var exp))
+            {
+                var expDate = DateTimeOffset.FromUnixTimeSeconds(exp);
+                return expDate < DateTimeOffset.UtcNow;
+            }
+        }
+        catch
+        {
+            return true;
+        }
+        return true;
+    }
+
+    private static byte[] ParseBase64WithoutPadding(string base64)
+    {
+        switch (base64.Length % 4)
+        {
+            case 2: base64 += "=="; break;
+            case 3: base64 += "="; break;
+        }
+        return Convert.FromBase64String(base64.Replace('-', '+').Replace('_', '/'));
+    }
+}

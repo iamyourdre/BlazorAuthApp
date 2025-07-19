@@ -3,9 +3,13 @@
 @inject HttpClient Http
 @inject IHttpClientFactory HttpClientFactory
 
-
 @using BlazorAuthApp.Components.Shared
 @using BlazorAuthApp.Models  
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using System.Text.Json
+@inject IJSRuntime JS
+@inject ProtectedSessionStorage SessionStorage
+
 <Toaster @ref="toaster" />
 
 <PageTitle>Login</PageTitle>  
@@ -24,10 +28,6 @@
             <label for="password" class="form-label">Password</label>  
             <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />  
         </div>
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger">@errorMessage</div>
-        }
         <div class="mb-3">  
             <button type="submit" class="btn btn-primary">Login</button>  
         </div>
@@ -40,7 +40,8 @@
     private Toaster? toaster;
 
     private async Task HandleLogin()  
-    {  
+    {
+
         errorMessage = null;
         try  
         {
@@ -50,15 +51,24 @@
                 return;
             }
 
-            // Use the named HttpClient
             var client = HttpClientFactory.CreateClient("MyHttpClient");
             var response = await client.PostAsJsonAsync("api/auth/login", loginModel);
 
             if (response.IsSuccessStatusCode)
-            {  
-                // Navigation.NavigateTo("/");
-                toaster?.ShowMessage(ToastType.Success, "TRUE.");
-            }  
+            {
+
+                var tokenResult = await response.Content.ReadFromJsonAsync<TokenResponseDTO>();
+
+                if (tokenResult != null)
+                {
+                    await SessionStorage.SetAsync("accessToken", tokenResult.AccessToken);
+					Navigation.NavigateTo("/");
+                }
+                else
+                {
+                    toaster?.ShowMessage(ToastType.Danger, "Login failed. Please try again.");
+                }
+            }
             else  
             {  
                 errorMessage = await response.Content.ReadAsStringAsync();
